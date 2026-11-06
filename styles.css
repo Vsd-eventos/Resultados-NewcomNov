@@ -88,12 +88,21 @@ h1 span{color:var(--rojo)}
 .cancha svg{width:18px;height:12px;color:var(--rojo)}
 
 .match{display:grid;gap:6px;padding:12px 12px 6px 14px}
-.team{position:relative;overflow:hidden;display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:10px;padding:10px 12px;border-radius:12px}
+.team,.sets-head{display:grid;grid-template-columns:20px 1fr repeat(3,28px) 46px;align-items:center;gap:6px}
+.team{position:relative;overflow:hidden;padding:10px 12px;border-radius:12px}
+.sets-head{padding:0 12px 2px;font:700 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--gris-2);text-align:center}
+.sets-head span:last-child{text-align:right}
+.set{font:600 15px/1 var(--display);font-variant-numeric:tabular-nums;text-align:center;color:var(--gris-2)}
+.set.w{color:var(--txt);font-weight:800}
+.set:empty::before{content:"–";opacity:.35}
+.team.gana .set{color:rgba(255,255,255,.65)}
+.team.gana .set.w{color:#fff}
 .ico{width:20px;height:20px;opacity:0;color:#fff}
 .nombre{display:flex;flex-direction:column;min-width:0}
 .name{font:600 15px/1.2 var(--sans);overflow-wrap:anywhere}
 .sub{display:none;margin-top:3px;font:700 10px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;opacity:.85}
-.score{font:800 36px/1 var(--display);font-variant-numeric:tabular-nums;min-width:2ch;text-align:right}
+.score{font:800 36px/1 var(--display);font-variant-numeric:tabular-nums;text-align:right;padding-left:6px;border-left:1px solid var(--linea)}
+.team.gana .score{border-left-color:rgba(255,255,255,.25)}
 
 .team.gana{background:linear-gradient(100deg,var(--rojo),var(--rojo-2));box-shadow:0 10px 24px -12px var(--rojo-glow),inset 0 1px 0 rgba(255,255,255,.22)}
 .team.gana::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.2) 50%,transparent 65%);transform:translateX(-100%);animation:brillo 4s ease-in-out infinite;pointer-events:none}
@@ -102,7 +111,9 @@ h1 span{color:var(--rojo)}
 .team.gana .sub{display:block}
 .team.pierde{color:var(--gris)}
 .team.pierde .score{color:var(--gris-2)}
-.card.empate .team{background:rgba(255,255,255,.04)}
+.card.empate .team,.card.en-juego .team{background:rgba(255,255,255,.04)}
+.card.en-juego .tag{display:inline-flex;align-items:center;gap:7px;color:#fff}
+.card.en-juego .tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--rojo);animation:pulso 2s infinite}
 
 .card-foot{display:flex;justify-content:space-between;align-items:center;padding:8px 16px 14px 18px;color:var(--gris-2);font-size:12px}
 .tag{font:700 12px var(--display);letter-spacing:.2em;text-transform:uppercase;color:var(--gris)}
