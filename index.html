@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Resultados en vivo · Newcom · VSD Eventos</title>
+  <meta name="description" content="Resultados en vivo del torneo de Newcom, categorías +50 y +60. Organiza VSD Eventos.">
+  <meta name="theme-color" content="#0A0A0B">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23D7192A'/%3E%3Ctext x='32' y='40' font-family='Arial' font-weight='700' font-size='24' fill='white' text-anchor='middle'%3EVSD%3C/text%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+<header class="hero">
+  <!-- Cancha de newcom (vista desde arriba) de fondo: red al centro y líneas de ataque -->
+  <svg class="cancha-bg" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g fill="none" stroke="#fff">
+      <rect x="20" y="20" width="360" height="160" stroke-width="1.5"/>
+      <line x1="140" y1="20" x2="140" y2="180" stroke-width="1.2"/>
+      <line x1="260" y1="20" x2="260" y2="180" stroke-width="1.2"/>
+      <line x1="200" y1="8" x2="200" y2="192" stroke-width="4"/>
+      <line x1="200" y1="8" x2="200" y2="192" stroke-width="1" stroke-dasharray="2 4" stroke="#000"/>
+    </g>
+  </svg>
+
+  <div class="hero-inner wrap">
+    <a class="logo logo-vsd" href="./" aria-label="VSD Eventos — inicio">
+      <span class="logo-big">VSD</span>
+      <span class="logo-small">eventos</span>
+    </a>
+
+    <div class="hero-title">
+      <p class="kicker">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2c0 5 3 8 8.5 9M12 2c-4 3-5 8-3 12M3.5 15.5c4 1 9 0 12-4M9 14c1 4 4 7 8.5 7.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        Torneo de Newcom
+      </p>
+      <h1>Resultados <span>en vivo</span></h1>
+      <p class="sub-cats">Categorías <strong>+50</strong> · <strong>+60</strong></p>
+    </div>
+
+    <div class="pais" role="img" aria-label="País participante: Argentina">
+      <svg class="bandera" viewBox="0 0 54 36" aria-hidden="true">
+        <defs><clipPath id="r"><rect width="54" height="36" rx="4"/></clipPath></defs>
+        <g clip-path="url(#r)">
+          <rect width="54" height="36" fill="#74ACDF"/>
+          <rect y="12" width="54" height="12" fill="#fff"/>
+          <g transform="translate(27 18)">
+            <g stroke="#F6B40E" stroke-width="1.1" stroke-linecap="round">
+              <line y1="-4.2" y2="-6.6"/><line y1="4.2" y2="6.6"/><line x1="-4.2" x2="-6.6"/><line x1="4.2" x2="6.6"/>
+              <line x1="-3" y1="-3" x2="-4.7" y2="-4.7"/><line x1="3" y1="3" x2="4.7" y2="4.7"/>
+              <line x1="3" y1="-3" x2="4.7" y2="-4.7"/><line x1="-3" y1="3" x2="-4.7" y2="4.7"/>
+            </g>
+            <circle r="3.4" fill="#F6B40E"/>
+            <circle r="3.4" fill="none" stroke="#843511" stroke-width=".5"/>
+          </g>
+        </g>
+      </svg>
+      <span class="pais-txt">Argentina</span>
+    </div>
+  </div>
+</header>
+
+<nav class="filtros wrap" id="filtros" aria-label="Filtros">
+  <div class="filtro-grupo">
+    <span class="filtro-label">Día</span>
+    <div class="chips" id="f-dia" role="group" aria-label="Filtrar por día"></div>
+  </div>
+  <div class="filtro-grupo">
+    <span class="filtro-label">Categoría</span>
+    <div class="chips" id="f-cat" role="group" aria-label="Filtrar por categoría"></div>
+  </div>
+</nav>
+
+<div class="estado wrap" id="estado" role="status" aria-live="polite">
+  <span class="dot" aria-hidden="true"></span>
+  <span id="estado-txt">Conectando…</span>
+  <span id="contador" class="contador"></span>
+</div>
+
+<main class="wrap">
+  <section id="grid" class="grid" aria-label="Partidos">
+    <div class="card skel"></div><div class="card skel"></div><div class="card skel"></div>
+  </section>
+  <p id="vacio" class="vacio" hidden>Todavía no hay resultados para este filtro.</p>
+</main>
+
+<footer class="pie">
+  <div class="wrap">
+    <span class="pie-bandera" aria-hidden="true"></span>
+    Organiza <strong>VSD Eventos</strong> · Torneo de Newcom · Argentina
+  </div>
+</footer>
+
+<template id="tpl-card">
+  <article class="card">
+    <header class="card-top">
+      <span class="cat"></span>
+      <span class="cancha">
+        <svg viewBox="0 0 24 16" aria-hidden="true"><rect x="1" y="1" width="22" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="12" y1="0" x2="12" y2="16" stroke="currentColor" stroke-width="2.2"/><line x1="8" y1="1" x2="8" y2="15" stroke="currentColor" stroke-width="1"/><line x1="16" y1="1" x2="16" y2="15" stroke="currentColor" stroke-width="1"/></svg>
+        <span class="cancha-txt"></span>
+      </span>
+    </header>
+    <div class="match">
+      <div class="team">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 3h8v4a4 4 0 0 1-8 0z"/><path d="M8 4.5H5a3 3 0 0 0 3 3.5M16 4.5h3a3 3 0 0 1-3 3.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path fill="currentColor" d="M11 11h2v4h3v3H8v-3h3z"/></svg>
+        <span class="nombre"><span class="name"></span><span class="sub">Ganador</span></span>
+        <span class="score"></span>
+      </div>
+      <div class="team">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 3h8v4a4 4 0 0 1-8 0z"/><path d="M8 4.5H5a3 3 0 0 0 3 3.5M16 4.5h3a3 3 0 0 1-3 3.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path fill="currentColor" d="M11 11h2v4h3v3H8v-3h3z"/></svg>
+        <span class="nombre"><span class="name"></span><span class="sub">Ganador</span></span>
+        <span class="score"></span>
+      </div>
+    </div>
+    <footer class="card-foot">
+      <span class="when"></span>
+      <span class="tag"></span>
+    </footer>
+  </article>
+</template>
+
+</body>
+</html>
