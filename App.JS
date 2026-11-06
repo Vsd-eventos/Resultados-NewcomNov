@@ -3,7 +3,7 @@
   /* ================= CONFIGURACIÓN ================= */
   const CONFIG = {
     // Pegá acá la URL de tu App Web (termina en /exec)
-    API_URL: 'https://script.google.com/macros/s/TU_ID_DE_IMPLEMENTACION/exec',
+    API_URL: 'https://script.google.com/macros/s/AKfycbzlesVgeN3zBPDdEkIoSDohy5zll6RNH4Be5WTvSK6hGDyI1gzx9suLhggo5bllT7Zf/exec',
     POLL_MS: 30000,          // cada cuánto se actualiza (30 s)
     JITTER_MS: 10000,        // dispersión aleatoria para no pegarle todos juntos
     MAX_BACKOFF_MS: 300000,  // espera máxima si hay errores (5 min)
