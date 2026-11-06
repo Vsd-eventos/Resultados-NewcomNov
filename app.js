@@ -3,7 +3,7 @@
   /* ================= CONFIGURACIÓN ================= */
   const CONFIG = {
     // Pegá acá la URL de tu App Web (termina en /exec)
-    API_URL: 'https://script.google.com/macros/s/AKfycbzlesVgeN3zBPDdEkIoSDohy5zll6RNH4Be5WTvSK6hGDyI1gzx9suLhggo5bllT7Zf/exec',
+    API_URL: 'https://script.google.com/macros/s/AKfycbwq_P0pVpqMCraHDwPCbJeeFbfgewcs0KofegcPABPnka3Gy8SUJqk3Q7-ircvPQcxy/exec',
     POLL_MS: 30000,          // cada cuánto se actualiza (30 s)
     JITTER_MS: 10000,        // dispersión aleatoria para no pegarle todos juntos
     MAX_BACKOFF_MS: 300000,  // espera máxima si hay errores (5 min)
@@ -12,14 +12,14 @@
     ZONA: 'America/Argentina/Cordoba'
   };
   const DEMO = CONFIG.API_URL.includes('TU_ID');
- 
+
   const DIAS = [
     { id: 'all', txt: 'Todos' }, { id: 'V', txt: 'Viernes' }, { id: 'S', txt: 'Sábado' }
   ];
   const CATS = ['+50', '+60'];
   const CAT_ITEMS = [{ id: 'all', txt: 'Todas' }].concat(CATS.map(c => ({ id: c, txt: c })));
   const DIA_TXT = { V: 'Viernes', S: 'Sábado', D: 'Domingo', O: '' };
- 
+
   /* ================= ESTADO ================= */
   const $ = id => document.getElementById(id);
   const el = {
@@ -34,7 +34,7 @@
     ultimaOk: 0, ultimoIntento: 0,
     vistos: null, nuevos: new Set()
   };
- 
+
   /* ================= FILTROS ================= */
   function leerHash() {
     const p = new URLSearchParams(location.hash.slice(1));
@@ -56,7 +56,7 @@
       return { Fri: 'V', Sat: 'S' }[d] || 'all';
     } catch { return 'all'; }
   }
- 
+
   function crearChips(cont, items, grupo) {
     const frag = document.createDocumentFragment();
     for (const it of items) {
@@ -70,7 +70,7 @@
     }
     cont.append(frag);
   }
- 
+
   function actualizarChips() {
     const porDia = { all: 0 }, porCat = { all: 0 };
     for (const x of st.m) {
@@ -85,7 +85,7 @@
       b.lastChild.textContent = st.m.length ? String(n) : '';
     }
   }
- 
+
   el.filtros.addEventListener('click', e => {
     const b = e.target.closest('.chip');
     if (!b) return;
@@ -94,7 +94,7 @@
     render();
   });
   window.addEventListener('hashchange', () => { leerHash(); render(); });
- 
+
   /* ================= RENDER ================= */
   function tarjeta(x) {
     const n = el.tpl.cloneNode(true);
@@ -102,27 +102,35 @@
     n.querySelector('.cancha-txt').textContent = x.cancha;
     n.querySelector('.when').textContent = [DIA_TXT[x.dia], x.fecha, x.hora && x.hora + ' h'].filter(Boolean).join(' · ');
     if (x.cat === '+60') n.classList.add('c60');
- 
+
     const [ta, tb] = n.querySelectorAll('.team');
-    const ganaA = x.pa > x.pb, ganaB = x.pb > x.pa;
-    equipo(ta, x.ea, x.pa, ganaA, ganaB);
-    equipo(tb, x.eb, x.pb, ganaB, ganaA);
- 
+    // El ganador sólo se resalta cuando el partido terminó
+    const ganaA = x.fin && x.pa > x.pb, ganaB = x.fin && x.pb > x.pa;
+    equipo(ta, x.ea, x.pa, x.sets, 0, ganaA, ganaB);
+    equipo(tb, x.eb, x.pb, x.sets, 1, ganaB, ganaA);
+
     const tag = n.querySelector('.tag');
-    if (!ganaA && !ganaB) { n.classList.add('empate'); tag.textContent = 'Empate'; }
+    if (!x.fin) { n.classList.add('en-juego'); tag.textContent = 'En juego · Set ' + Math.min(x.sets.length + 1, 3); }
+    else if (!ganaA && !ganaB) { n.classList.add('empate'); tag.textContent = 'Empate'; }
     else tag.textContent = 'Final';
- 
+
     if (st.nuevos.has(x.k)) n.classList.add('nuevo');
-    n.setAttribute('aria-label', `${x.cat}, ${x.cancha}: ${x.ea} ${x.pa}, ${x.eb} ${x.pb}`);
+    const detalle = x.sets.map((z, i) => `set ${i + 1} ${z[0]} a ${z[1]}`).join(', ');
+    n.setAttribute('aria-label', `Categoría ${x.cat}, ${x.cancha}. ${x.ea} ${x.pa} sets, ${x.eb} ${x.pb} sets. ${detalle}. ${tag.textContent}`);
     return n;
   }
-  function equipo(nodo, nombre, pts, gana, pierde) {
+  function equipo(nodo, nombre, ganados, sets, lado, gana, pierde) {
     nodo.querySelector('.name').textContent = nombre;
-    nodo.querySelector('.score').textContent = String(pts);
+    nodo.querySelector('.score').textContent = String(ganados);
+    const celdas = nodo.querySelectorAll('.set');
+    sets.forEach((z, i) => {
+      celdas[i].textContent = String(z[lado]);
+      if (z[lado] > z[1 - lado]) celdas[i].classList.add('w');
+    });
     if (gana) nodo.classList.add('gana');
     if (pierde) nodo.classList.add('pierde');
   }
- 
+
   function render() {
     const lista = st.m.filter(x =>
       (st.dia === 'all' || x.dia === st.dia) && (st.cat === 'all' || x.cat === st.cat));
@@ -134,30 +142,34 @@
     actualizarChips();
     st.nuevos.clear();
   }
- 
+
   /* ================= DATOS ================= */
   const txt = (s, max = 60) => String(s == null ? '' : s).slice(0, max);
- 
+
   function normalizar(j) {
     if (!j || typeof j !== 'object' || !Array.isArray(j.m)) return null;
     const out = [];
     for (const r of j.m.slice(0, 3000)) {
       if (!Array.isArray(r) || r.length < 9) continue;
+      const sets = (Array.isArray(r[9]) ? r[9] : []).slice(0, 3)
+        .filter(x => Array.isArray(x) && Number.isInteger(x[0]) && Number.isInteger(x[1]))
+        .map(x => [x[0], x[1]]);
       const pa = Number(r[6]), pb = Number(r[8]);
       const cat = txt(r[3]);
       if (!Number.isInteger(pa) || !Number.isInteger(pb) || !CATS.includes(cat)) continue;
       const dia = ['V', 'S', 'D'].includes(r[0]) ? r[0] : 'O';
       const x = {
         dia, fecha: txt(r[1], 5), hora: txt(r[2], 5), cat,
-        cancha: txt(r[4]), ea: txt(r[5]), pa, eb: txt(r[7]), pb
+        cancha: txt(r[4]), ea: txt(r[5]), pa, eb: txt(r[7]), pb,
+        sets, fin: r[10] !== 'J'
       };
       x.k = [x.fecha, x.cat, x.cancha, x.ea, x.eb].join('|').toLowerCase();
-      x.firma = x.k + '|' + pa + '-' + pb;
+      x.firma = x.k + '|' + sets.map(z => z.join('-')).join(',') + '|' + r[10];
       out.push(x);
     }
     return out;
   }
- 
+
   function aplicar(j, desdeRed) {
     const m = normalizar(j);
     if (!m) throw new Error('Formato inválido');
@@ -169,7 +181,7 @@
     render();
     if (desdeRed) guardarLocal(j);
   }
- 
+
   function guardarLocal(j) {
     try { localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(j)); } catch { /* sin storage */ }
   }
@@ -179,7 +191,7 @@
       if (s) aplicar(JSON.parse(s), false);
     } catch { /* ignorar */ }
   }
- 
+
   async function pedir() {
     if (DEMO) return demo();
     const ctrl = new AbortController();
@@ -193,7 +205,7 @@
       return await r.json();
     } finally { clearTimeout(to); }
   }
- 
+
   async function cargar() {
     if (st.cargando || document.hidden) return;
     st.cargando = true;
@@ -211,7 +223,7 @@
       programar(siguienteEspera());
     }
   }
- 
+
   function siguienteEspera() {
     if (st.fallos) return Math.min(CONFIG.POLL_MS * 2 ** st.fallos, CONFIG.MAX_BACKOFF_MS) * (0.8 + Math.random() * 0.4);
     return CONFIG.POLL_MS + Math.random() * CONFIG.JITTER_MS;
@@ -220,7 +232,7 @@
     clearTimeout(st.timer);
     if (!document.hidden) st.timer = setTimeout(cargar, ms);
   }
- 
+
   // Si la pestaña no se ve, no consulta: esto baja muchísimo la carga total
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { clearTimeout(st.timer); return; }
@@ -228,7 +240,7 @@
     programar(Math.max(0, CONFIG.POLL_MS - pasado));
   });
   window.addEventListener('online', () => programar(500));
- 
+
   /* ================= ESTADO VISUAL ================= */
   function pintarEstado() {
     const err = st.fallos > 0;
@@ -241,21 +253,21 @@
     }
   }
   setInterval(() => { if (!document.hidden) pintarEstado(); }, 10000);
- 
+
   /* ================= DEMO (si no hay URL configurada) ================= */
   function demo() {
     const eq = ['Club Atlético Rosario', 'Las Leonas de Córdoba', 'Newcom Mendoza', 'Club San Lorenzo', 'Unión de Tandil', 'Las Panteras', 'Club Náutico', 'Abuelos del Sur'];
     const filas = [
-      ['V', '13/11', '10:30', '+50', 'Cancha 1', eq[0], 2, eq[1], 0],
-      ['V', '13/11', '11:15', '+60', 'Cancha 2', eq[2], 1, eq[3], 2],
-      ['V', '13/11', '12:00', '+50', 'Cancha 3', eq[4], 2, eq[5], 1],
-      ['S', '14/11', '10:00', '+60', 'Cancha 1', eq[6], 25, eq[7], 21],
-      ['S', '14/11', '10:45', '+50', 'Cancha 2', eq[1], 1, eq[4], 1],
-      ['S', '14/11', '11:30', '+60', 'Cancha 3', eq[3], 0, eq[7], 2]
+      ['V', '13/11', '10:30', '+50', 'Cancha 1', eq[0], 2, eq[1], 0, [[25, 18], [25, 21]], 'F'],
+      ['V', '13/11', '11:15', '+60', 'Cancha 2', eq[2], 1, eq[3], 2, [[25, 23], [19, 25], [12, 15]], 'F'],
+      ['V', '13/11', '12:00', '+50', 'Cancha 3', eq[4], 1, eq[5], 1, [[25, 20], [22, 25]], 'J'],
+      ['S', '14/11', '10:00', '+60', 'Cancha 1', eq[6], 2, eq[7], 1, [[20, 25], [25, 17], [15, 11]], 'F'],
+      ['S', '14/11', '10:45', '+50', 'Cancha 2', eq[1], 0, eq[4], 1, [[21, 25]], 'J'],
+      ['S', '14/11', '11:30', '+60', 'Cancha 3', eq[3], 0, eq[7], 2, [[18, 25], [23, 25]], 'F']
     ];
     return Promise.resolve({ v: 1, m: filas });
   }
- 
+
   /* ================= INICIO ================= */
   crearChips(el.fDia, DIAS, 'dia');
   crearChips(el.fCat, CAT_ITEMS, 'cat');
