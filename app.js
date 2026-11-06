@@ -3,7 +3,7 @@
   /* ================= CONFIGURACIÓN ================= */
   const CONFIG = {
     // Pegá acá la URL de tu App Web (termina en /exec)
-    API_URL: 'https://script.google.com/macros/s/AKfycbwq_P0pVpqMCraHDwPCbJeeFbfgewcs0KofegcPABPnka3Gy8SUJqk3Q7-ircvPQcxy/exec',
+    API_URL: 'https://script.google.com/macros/s/AKfycbzaH5BjjH_-7zRudhhsWDO9zDj4g7ZlWUe3AvpoWz3kMMjayMD4vz0iKqUcenjZdovV/exec',
     POLL_MS: 30000,          // cada cuánto se actualiza (30 s)
     JITTER_MS: 10000,        // dispersión aleatoria para no pegarle todos juntos
     MAX_BACKOFF_MS: 300000,  // espera máxima si hay errores (5 min)
@@ -112,7 +112,14 @@
     const tag = n.querySelector('.tag');
     if (!x.fin) { n.classList.add('en-juego'); tag.textContent = 'En juego · Set ' + Math.min(x.sets.length + 1, 3); }
     else if (!ganaA && !ganaB) { n.classList.add('empate'); tag.textContent = 'Empate'; }
-    else tag.textContent = 'Final';
+    else {
+      tag.textContent = 'Final';
+      const res = document.createElement('span');
+      res.className = 'res';
+      res.textContent = `${x.pa}–${x.pb}`;
+      res.title = 'Resultado en sets';
+      tag.before(res);
+    }
 
     if (st.nuevos.has(x.k)) n.classList.add('nuevo');
     const detalle = x.sets.map((z, i) => `set ${i + 1} ${z[0]} a ${z[1]}`).join(', ');
@@ -275,4 +282,4 @@
   leerLocal();               // muestra al instante lo último que vio este navegador
   actualizarChips();
   setTimeout(cargar, Math.random() * 600);
-})();
+})(); 
